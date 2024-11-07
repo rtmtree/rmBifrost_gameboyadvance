@@ -7,3 +7,9 @@
 [submodule "external/vba-next"]
 	path = external/vba-next
 	url = https://github.com/FASTSHIFT/vba-next
+[submodule "external/lv_lib_100ask"]
+	path = external/lv_lib_100ask
+	url = https://github.com/100askTeam/lv_lib_100ask
+[submodule "external/lv_gba_emu"]
+	path = external/lv_gba_emu
+	url = https://github.com/FASTSHIFT/lv_gba_emu
