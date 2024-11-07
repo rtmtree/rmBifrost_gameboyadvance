@@ -1,7 +1,7 @@
 #include "boot_screen.h"
 
-#include <thread>
 #include <spdlog/spdlog.h>
+#include <thread>
 
 #include "../constants.h"
 #include <src/core/lv_obj_pos.h>
@@ -25,16 +25,118 @@ const uint8_t test_lottie_approve[] = {
 
 const size_t test_lottie_approve_size = sizeof(test_lottie_approve);
 
-void boot_screen::start() {
+#define GBA_EMU_PREFIX "gba_emu: "
+
+#define OPTARG_TO_VALUE(value, type, base)                                  \
+    do {                                                                    \
+        char* ptr;                                                          \
+        (value) = (type)strtoul(optarg, &ptr, (base));                      \
+        if (*ptr != '\0') {                                                 \
+            printf(GBA_EMU_PREFIX "Parameter error: -%c %s\n", ch, optarg); \
+            show_usage(argv[0], EXIT_FAILURE);                              \
+        }                                                                   \
+    } while (0)
+
+typedef struct
+{
+    const char* file_path;
+    lv_gba_view_mode_t mode;
+    int volume;
+} gba_emu_param_t;
+
+static void show_usage(const char* progname, int exitcode)
+{
+    printf("\nUsage: %s"
+           " -f <string> -m <decimal-value> -m <decimal-value> -h\n",
+        progname);
+    printf("\nWhere:\n");
+    printf("  -f <string> rom file path.\n");
+    printf("  -m <decimal-value> view mode: "
+           "0: simple; 1: virtual keypad.\n");
+    printf("  -v <decimal-value> set volume: 0 ~ 100.\n");
+    printf("  -h help.\n");
+
+    exit(exitcode);
+}
+
+static void parse_commandline(int argc, char* const* argv, gba_emu_param_t* param)
+{
+    int ch;
+
+    // if (argc < 2) {
+    //     show_usage(argv[0], EXIT_FAILURE);
+    // }
+
+    memset(param, 0, sizeof(gba_emu_param_t));
+    param->mode = LV_VER_RES < 400 ? LV_GBA_VIEW_MODE_SIMPLE : LV_GBA_VIEW_MODE_VIRTUAL_KEYPAD;
+    param->volume = 100;
+    if (argc == 1) {
+        param->file_path = "rom/silent.gba";
+    }
+
+    while ((ch = getopt(argc, argv, "f:m:v:h")) != -1) {
+        switch (ch) {
+        case 'f':
+            param->file_path = optarg;
+            break;
+
+        case 'm':
+            OPTARG_TO_VALUE(param->mode, lv_gba_view_mode_t, 10);
+            break;
+
+        case 'v':
+            OPTARG_TO_VALUE(param->volume, int, 10);
+            break;
+
+        case '?':
+            printf(GBA_EMU_PREFIX ": Unknown option: %c\n", optopt);
+        case 'h':
+            show_usage(argv[0], EXIT_FAILURE);
+            break;
+        }
+    }
+}
+
+static void log_print_cb(lv_log_level_t level, const char* str)
+{
+    LV_UNUSED(level);
+    printf("[LVGL]%s", str);
+}
+
+void boot_screen::start()
+{
     spdlog::debug("Presenting launch options");
     lvgl_renderer_inst->set_global_refresh_hint(COLOR_FAST);
     // setup_animation();
-    uint32_t buf[CANVAS_WIDTH_TO_STRIDE(100, 4) * 100 + LV_DRAW_BUF_ALIGN];
-    lv_obj_t* lottie = lv_lottie_create(lv_screen_active());
-    lv_lottie_set_buffer(lottie, 100, 100, lv_draw_buf_align(buf, LV_COLOR_FORMAT_ARGB8888));
-    lv_lottie_set_src_data(lottie, test_lottie_approve, test_lottie_approve_size);
-    lv_obj_center(lottie);
 
+    // uint32_t buf[CANVAS_WIDTH_TO_STRIDE(100, 4) * 100 + LV_DRAW_BUF_ALIGN];
+    // lv_obj_t* lottie = lv_lottie_create(lv_screen_active());
+    // lv_lottie_set_buffer(lottie, 100, 100, lv_draw_buf_align(buf, LV_COLOR_FORMAT_ARGB8888));
+    // lv_lottie_set_src_data(lottie, test_lottie_approve, test_lottie_approve_size);
+    // lv_obj_center(lottie);
+
+    {
+        gba_emu_param_t param;
+        parse_commandline(argc, (char* const*)argv, &param);
+
+        lv_obj_t* gba_emu = lv_gba_emu_create(lv_scr_act(), param.file_path, param.mode);
+
+        if (!gba_emu) {
+            LV_LOG_USER("create gba emu failed");
+            return -1;
+        }
+
+        gba_port_init(gba_emu);
+
+        LV_LOG_USER("volume = %d", param.volume);
+        if (param.volume > 0) {
+            if (gba_audio_init(gba_emu) < 0) {
+                LV_LOG_WARN("audio init failed");
+            }
+        }
+
+        lv_obj_center(gba_emu);
+    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(4000));
 
@@ -49,13 +151,15 @@ void boot_screen::start() {
     lvgl_renderer_inst->refresh({ 0, 0 }, { SCREEN_WIDTH, SCREEN_HEIGHT }, FULL);
 }
 
-boot_screen::~boot_screen() {
-    for (auto obj: deletion_queue) {
+boot_screen::~boot_screen()
+{
+    for (auto obj : deletion_queue) {
         lv_obj_delete(obj);
     }
 }
 
-void boot_screen::setup_animation() {
+void boot_screen::setup_animation()
+{
     welcome_json = get_resource_file("animations/hello.json");
 
     auto lottie_obj = lv_lottie_create(lv_screen_active());
@@ -72,7 +176,8 @@ void boot_screen::setup_animation() {
     deletion_queue.push_back(lottie_obj);
 }
 
-lv_obj_t *boot_screen::create_boot_option(const char *title) {
+lv_obj_t* boot_screen::create_boot_option(const char* title)
+{
     auto btn = lv_obj_create(lv_screen_active());
     lv_obj_set_size(btn, LV_PCT(40), LV_SIZE_CONTENT);
     lv_obj_set_style_border_color(btn, lv_color_black(), 0);
@@ -105,30 +210,29 @@ lv_obj_t *boot_screen::create_boot_option(const char *title) {
     return btn;
 }
 
-void boot_screen::setup_boot_selection() {
+void boot_screen::setup_boot_selection()
+{
     auto remarkable = create_boot_option("reMarkable OS");
     lv_obj_align(remarkable, LV_ALIGN_BOTTOM_MID, 0, -425);
 
-    lv_obj_add_event_cb(remarkable, [](lv_event_t *event) {
+    lv_obj_add_event_cb(remarkable, [](lv_event_t* event) {
         spdlog::debug("Launching reMarkable OS");
         if (auto instance = boot_screen::instance.lock()) {
             instance->state = RM_STOCK_OS;
             instance->cv.notify_one();
-        }
-    }, LV_EVENT_CLICKED, nullptr);
+        } }, LV_EVENT_CLICKED, nullptr);
 
     auto bifrost = create_boot_option("Bifrost");
     lv_obj_align(bifrost, LV_ALIGN_BOTTOM_MID, 0, -200);
 
     instance = shared_from_this();
 
-    lv_obj_add_event_cb(bifrost, [](lv_event_t *event) {
+    lv_obj_add_event_cb(bifrost, [](lv_event_t* event) {
         spdlog::debug("Launching Bifrost");
         if (auto instance = boot_screen::instance.lock()) {
             instance->state = BIFROST;
             instance->cv.notify_one();
-        }
-    }, LV_EVENT_CLICKED, nullptr);
+        } }, LV_EVENT_CLICKED, nullptr);
 }
 
 std::weak_ptr<boot_screen> boot_screen::instance;
