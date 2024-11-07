@@ -4,3 +4,6 @@
 [submodule "external/lvgl"]
 	path = external/lvgl
 	url = https://github.com/lvgl/lvgl
+[submodule "external/vba-next"]
+	path = external/vba-next
+	url = https://github.com/FASTSHIFT/vba-next
