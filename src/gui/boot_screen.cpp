@@ -3,12 +3,16 @@
 #include <spdlog/spdlog.h>
 #include <thread>
 
-#include "../../external/lv_lib_100ask/lv_lib_100ask.h"
+// #include "../../external/lvgl/src/misc/lv_event.h"
+// #include "../../external/lv_lib_100ask/src/lv_100ask_nes/lv_100ask_nes.h"
+// #include "../../external/lv_lib_100ask/examples/lv_100ask_nes/lv_100ask_example_nes.h"
 #include "../constants.h"
 #include <src/core/lv_obj_pos.h>
 #include <src/display/lv_display.h>
 #include <src/misc/lv_anim.h>
 #include <src/widgets/lottie/lv_lottie.h>
+
+#include "nes_instance.h"
 
 #define CANVAS_WIDTH_TO_STRIDE(w, px_size) ((((w) * (px_size) + (LV_DRAW_BUF_STRIDE_ALIGN - 1)) / LV_DRAW_BUF_STRIDE_ALIGN) * LV_DRAW_BUF_STRIDE_ALIGN)
 
@@ -25,6 +29,33 @@ const uint8_t test_lottie_approve[] = {
 };
 
 const size_t test_lottie_approve_size = sizeof(test_lottie_approve);
+
+// void lv_100ask_nes_run_internal(void * obj)
+// {
+//     LV_ASSERT_OBJ(obj, MY_CLASS);
+
+//     nes_obj = (lv_obj_t *)obj;
+
+//     lv_100ask_nes_set_lock(nes_obj);
+//     // Wait for the user to select the file when starting for the first time
+//     lv_100ask_nes_set_unlock(nes_obj);
+
+//     lv_100ask_nes_set_state(nes_obj, LV_100ASK_NES_STATE_NORMAL);
+
+//     if (start_application(lv_100ask_nes_get_fn(nes_obj)))
+//     {
+//       /* MainLoop */
+//       InfoNES_Main();
+
+//       /* End */
+//       SaveSRAM();
+//     }
+//     else
+//     {
+//       /* Not a NES format file */
+//       LV_LOG_ERROR("%s isn't a NES format file!", lv_100ask_nes_get_fn(nes_obj));
+//     }
+// }
 
 // #define GBA_EMU_PREFIX "gba_emu: "
 
@@ -102,17 +133,33 @@ const size_t test_lottie_approve_size = sizeof(test_lottie_approve);
 //     printf("[LVGL]%s", str);
 // }
 
+
 void boot_screen::start()
 {
     spdlog::debug("Presenting launch options");
     lvgl_renderer_inst->set_global_refresh_hint(COLOR_FAST);
-    // setup_animation();
 
-    // uint32_t buf[CANVAS_WIDTH_TO_STRIDE(100, 4) * 100 + LV_DRAW_BUF_ALIGN];
-    // lv_obj_t* lottie = lv_lottie_create(lv_screen_active());
-    // lv_lottie_set_buffer(lottie, 100, 100, lv_draw_buf_align(buf, LV_COLOR_FORMAT_ARGB8888));
-    // lv_lottie_set_src_data(lottie, test_lottie_approve, test_lottie_approve_size);
-    // lv_obj_center(lottie);
+    {
+        // Hello
+
+        // setup_animation();
+    }
+
+    {
+        // Green Tick
+
+        // uint32_t buf[CANVAS_WIDTH_TO_STRIDE(100, 4) * 100 + LV_DRAW_BUF_ALIGN];
+        // lv_obj_t* lottie = lv_lottie_create(lv_screen_active());
+        // lv_lottie_set_buffer(lottie, 100, 100, lv_draw_buf_align(buf, LV_COLOR_FORMAT_ARGB8888));
+        // lv_lottie_set_src_data(lottie, test_lottie_approve, test_lottie_approve_size);
+        // lv_obj_center(lottie);
+    }
+
+    {
+        // NES
+        start_nes();
+    }
+
 
     {
         // gba_emu_param_t param;
@@ -137,117 +184,7 @@ void boot_screen::start()
         // lv_obj_center(gba_emu);
     }
 
-    {
-        lv_obj_t* parent;
-        parent = lv_100ask_nes_create(lv_screen_active());
-        lv_obj_center(parent);
 
-        /*ctrl btnm style*/
-        static lv_style_t nes_ctrl_btn_style;
-        lv_style_init(&nes_ctrl_btn_style);
-        lv_style_set_bg_opa(&nes_ctrl_btn_style, LV_OPA_0);
-        lv_style_set_pad_all(&nes_ctrl_btn_style, 4);
-        lv_style_set_radius(&nes_ctrl_btn_style, 0);
-        lv_style_set_border_width(&nes_ctrl_btn_style, 0);
-
-        lv_obj_t* ctrl_area = lv_obj_create(parent);
-        lv_obj_remove_style_all(ctrl_area);
-        lv_obj_set_size(ctrl_area, LV_PCT(100), LV_PCT(50));
-        lv_obj_align(ctrl_area, LV_ALIGN_BOTTOM_MID, 0, 0);
-
-        lv_obj_t* btnm_dir = lv_btnmatrix_create(ctrl_area);
-        lv_obj_set_height(btnm_dir, LV_PCT(60));
-        lv_obj_align(btnm_dir, LV_ALIGN_LEFT_MID, 0, 0);
-        lv_buttonmatrix_set_map(btnm_dir, btnm_dir_map);
-        lv_buttonmatrix_set_button_ctrl_all(btnm_dir, LV_BTNMATRIX_CTRL_CHECKED);
-        lv_buttonmatrix_set_button_ctrl(btnm_dir, 0, LV_BTNMATRIX_CTRL_HIDDEN);
-        lv_buttonmatrix_set_button_ctrl(btnm_dir, 2, LV_BTNMATRIX_CTRL_HIDDEN);
-        lv_buttonmatrix_set_button_ctrl(btnm_dir, 4, LV_BTNMATRIX_CTRL_HIDDEN);
-        lv_buttonmatrix_set_button_ctrl(btnm_dir, 6, LV_BTNMATRIX_CTRL_HIDDEN);
-        lv_buttonmatrix_set_button_ctrl(btnm_dir, 8, LV_BTNMATRIX_CTRL_HIDDEN);
-        lv_obj_add_style(btnm_dir, &nes_ctrl_btn_style, 0);
-
-        lv_obj_t* btnm_menu = lv_btnmatrix_create(ctrl_area);
-        lv_obj_set_height(btnm_menu, LV_PCT(10));
-        lv_obj_align(btnm_menu, LV_ALIGN_BOTTOM_MID, 0, 0);
-        lv_buttonmatrix_set_map(btnm_menu, btnm_menu_map);
-        lv_buttonmatrix_set_button_ctrl_all(btnm_menu, LV_BTNMATRIX_CTRL_CHECKED);
-        // lv_buttonmatrix_set_button_ctrl(btnm_menu, 1, LV_BTNMATRIX_CTRL_CHECKABLE);
-        lv_buttonmatrix_set_button_width(btnm_menu, 0, 3);
-        lv_buttonmatrix_set_button_width(btnm_menu, 1, 1);
-        lv_buttonmatrix_set_button_width(btnm_menu, 2, 3);
-        lv_obj_add_style(btnm_menu, &nes_ctrl_btn_style, 0);
-
-        lv_obj_t* btnm_opt = lv_btnmatrix_create(ctrl_area);
-        // lv_obj_set_height(btnm_opt, LV_PCT(20));
-        lv_obj_set_size(btnm_opt, LV_PCT(25), LV_PCT(20));
-        lv_obj_align(btnm_opt, LV_ALIGN_RIGHT_MID, 0, 0);
-        lv_buttonmatrix_set_map(btnm_opt, btnm_opt_map);
-        lv_buttonmatrix_set_button_ctrl_all(btnm_opt, LV_BTNMATRIX_CTRL_CHECKED);
-        lv_buttonmatrix_set_button_ctrl(btnm_opt, 2, LV_BTNMATRIX_CTRL_HIDDEN);
-        lv_obj_set_style_radius(btnm_opt, 360, LV_PART_ITEMS);
-        lv_obj_add_style(btnm_opt, &nes_ctrl_btn_style, 0);
-
-        lv_obj_add_event_cb(btnm_dir, ctrl_btnm_event_cb, LV_EVENT_ALL, parent);
-        lv_obj_add_event_cb(btnm_menu, ctrl_btnm_event_cb, LV_EVENT_ALL, parent);
-        lv_obj_add_event_cb(btnm_opt, ctrl_btnm_event_cb, LV_EVENT_ALL, parent);
-
-        /*menu*/
-        lv_obj_t* menu_area = lv_tabview_create(lv_layer_top());
-        lv_tabview_set_tab_bar_size(menu_area, 0);
-        lv_obj_center(menu_area);
-        lv_obj_set_size(menu_area, LV_PCT(70), LV_PCT(70));
-        lv_obj_set_style_radius(menu_area, 8, LV_PART_MAIN);
-
-        // Add some tabs (the tabs are page (lv_page) and can be scrolled
-        lv_obj_t* tab1 = lv_tabview_add_tab(menu_area, "Setting");
-        lv_obj_t* tab2 = lv_tabview_add_tab(menu_area, "File explorer");
-        lv_tabview_set_act(menu_area, 1, LV_ANIM_OFF);
-        lv_obj_add_event_cb(lv_tabview_get_content(menu_area), menu_scroll_event_cb, LV_EVENT_SCROLL_END, NULL);
-
-        // tab 1: setting
-        lv_obj_set_flex_flow(tab1, LV_FLEX_FLOW_COLUMN);
-        lv_obj_set_flex_align(tab1, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-        create_slider(tab1, LV_SYMBOL_SETTINGS, "Volume", 0, 100, 0);
-        create_slider(tab1, LV_SYMBOL_SETTINGS, "Brightness", 0, 100, 80);
-        create_slider(tab1, LV_SYMBOL_SETTINGS, "Zoom", 0, 1024, 256); // <256: scale down, >256 scale up, 128 half size, 512 double size
-        create_slider(tab1, LV_SYMBOL_SETTINGS, "Velocity", 0, 50000, 0); // max 100ms(usleep)
-
-        // tab 2: files explorer
-        lv_obj_t* file_explorer = lv_file_explorer_create(tab2);
-        lv_obj_center(file_explorer);
-        // lv_obj_align(file_explorer, LV_ALIGN_TOP_RIGHT, 0 ,0);
-        lv_obj_set_size(file_explorer, LV_PCT(100), LV_PCT(100));
-
-#if LV_USE_FS_WIN32
-        lv_file_explorer_open_dir(file_explorer, "D:/ROM/NES");
-#else
-        lv_file_explorer_open_dir(file_explorer, "/root/ROM/NES");
-#endif
-
-        lv_obj_add_event_cb(file_explorer, file_explorer_event_cb, LV_EVENT_VALUE_CHANGED, parent);
-
-        /* Modal Dialogue Box */
-        lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
-        // lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_HIDDEN);
-        lv_obj_set_style_bg_opa(lv_layer_top(), LV_OPA_50, 0);
-        lv_obj_set_style_bg_color(lv_layer_top(), lv_palette_main(LV_PALETTE_GREY), 0);
-        lv_obj_add_event_cb(lv_layer_top(), layer_top_event_cb, LV_EVENT_CLICKED, parent);
-
-        /* 页面切换提示(Page switching prompt) */
-        lv_obj_t* label;
-        label = lv_label_create(lv_layer_top());
-        lv_label_set_text(label, LV_SYMBOL_LEFT "  ");
-        lv_obj_align_to(label, menu_area, LV_ALIGN_OUT_LEFT_MID, 0, 0);
-
-        label = lv_label_create(lv_layer_top());
-        lv_label_set_text(label, "  " LV_SYMBOL_RIGHT);
-        lv_obj_align_to(label, menu_area, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
-
-        lv_100ask_nes_set_state(parent, LV_100ASK_NES_STATE_MENU);
-        lv_100ask_nes_set_key(parent, LV_100ASK_NES_KEY_MENU, LV_100ASK_NES_KEY_STATE_RELEASED);
-        lv_100ask_nes_set_lock(parent);
-    }
 
     std::this_thread::sleep_for(std::chrono::milliseconds(4000));
 

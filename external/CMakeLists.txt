@@ -1,3 +1,4 @@
 target_include_directories(rmBifrost PUBLIC BSWR)
 target_include_directories(rmBifrost PUBLIC spdlog/include)
 target_include_directories(rmBifrost PUBLIC lvgl)
+target_include_directories(rmBifrost PUBLIC lv_lib_100ask)

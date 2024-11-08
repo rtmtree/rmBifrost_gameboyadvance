@@ -3,6 +3,7 @@ set(HEADER_LIST "${PROJECT_SOURCE_DIR}/include/bifrost/bifrost.hpp")
 
 file(GLOB BSWR_SOURCES ${PROJECT_SOURCE_DIR}/external/BSWR/*.c)
 file(GLOB_RECURSE lvgl_sources ${PROJECT_SOURCE_DIR}/external/lvgl/src/*.c ${PROJECT_SOURCE_DIR}/external/lvgl/src/*.cpp)
+file(GLOB_RECURSE lv_lib_100ask_sources ${PROJECT_SOURCE_DIR}/external/lv_lib_100ask/src/*.c ${PROJECT_SOURCE_DIR}/external/lv_lib_100ask/src/*.cpp)
 
 # -Wnarrowing
 add_compile_options(-Wno-narrowing)
@@ -16,8 +17,11 @@ add_library(rmBifrost SHARED entrypoint.cpp
         gui/lvgl_renderer.h
         ${BSWR_SOURCES}
         ${lvgl_sources}
+        ${lv_lib_100ask_sources}
         gui/boot_screen.cpp
         gui/boot_screen.h
+        gui/nes_instance.cpp
+        gui/nes_instance.h
 
         # fonts
         resources/fonts/ebgaramond_48.c

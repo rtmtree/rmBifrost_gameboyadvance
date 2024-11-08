@@ -935,7 +935,7 @@
 
 /*1: Enable file explorer*/
 /*Requires: lv_table*/
-#define LV_USE_FILE_EXPLORER                     0
+#define LV_USE_FILE_EXPLORER                     1
 #if LV_USE_FILE_EXPLORER
     /*Maximum length of path*/
     #define LV_FILE_EXPLORER_PATH_MAX_LEN        (128)
@@ -949,6 +949,9 @@
  *==================*/
 
 /*Use SDL to open window on PC and handle mouse and keyboard*/
+// #ifndef LV_USE_SDL
+//     #define LV_USE_SDL              1
+// #endif
 #define LV_USE_SDL              0
 #if LV_USE_SDL
     #define LV_SDL_INCLUDE_PATH     <SDL2/SDL.h>
