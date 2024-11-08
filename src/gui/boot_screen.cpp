@@ -12,7 +12,8 @@
 #include <src/misc/lv_anim.h>
 #include <src/widgets/lottie/lv_lottie.h>
 
-#include "nes_instance.h"
+// #include "nes_instance.h"
+#include "happ_instance.h"
 
 #define CANVAS_WIDTH_TO_STRIDE(w, px_size) ((((w) * (px_size) + (LV_DRAW_BUF_STRIDE_ALIGN - 1)) / LV_DRAW_BUF_STRIDE_ALIGN) * LV_DRAW_BUF_STRIDE_ALIGN)
 
@@ -157,9 +158,12 @@ void boot_screen::start()
 
     {
         // NES
-        start_nes();
+        // start_nes();
     }
 
+    {
+        start_hack_app();
+    }
 
     {
         // gba_emu_param_t param;

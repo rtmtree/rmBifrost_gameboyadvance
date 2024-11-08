@@ -20,8 +20,10 @@ add_library(rmBifrost SHARED entrypoint.cpp
         ${lv_lib_100ask_sources}
         gui/boot_screen.cpp
         gui/boot_screen.h
-        gui/nes_instance.cpp
-        gui/nes_instance.h
+        # gui/nes_instance.cpp
+        # gui/nes_instance.h
+        gui/happ_instance.cpp
+        gui/happ_instance.h
 
         # fonts
         resources/fonts/ebgaramond_48.c
