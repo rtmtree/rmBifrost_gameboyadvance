@@ -1,21 +1,11 @@
-#include "boot_screen.h"
+#include <string.h>
 
-#include <spdlog/spdlog.h>
-#include <thread>
-
-// #include "../../external/lvgl/src/misc/lv_event.h"
-// #include "../../external/lv_lib_100ask/src/lv_100ask_nes/lv_100ask_nes.h"
-// #include "../../external/lv_lib_100ask/examples/lv_100ask_nes/lv_100ask_example_nes.h"
-#include "../constants.h"
-#include <src/core/lv_obj_pos.h>
-#include <src/display/lv_display.h>
-#include <src/misc/lv_anim.h>
-#include <src/widgets/lottie/lv_lottie.h>
-
-// #include "nes_instance.h"
-#include "happ_instance.h"
-
-#define CANVAS_WIDTH_TO_STRIDE(w, px_size) ((((w) * (px_size) + (LV_DRAW_BUF_STRIDE_ALIGN - 1)) / LV_DRAW_BUF_STRIDE_ALIGN) * LV_DRAW_BUF_STRIDE_ALIGN)
+#include "../../external/lv_gba_emu/gba_emu/gba_emu.h"
+#include "../../external/lv_gba_emu/port/port.h"
+#include "../../external/lvgl/demos/lv_demos.h"
+#include "../../external/lvgl/examples/lv_examples.h"
+#include "../../external/lvgl/lvgl.h"
+#include "gba_instance.h"
 
 const uint8_t test_lottie_approve[] = {
     0x7b, 0x22, 0x76, 0x22, 0x3a, 0x22, 0x34, 0x2e, 0x38, 0x2e, 0x30, 0x22, 0x2c, 0x22, 0x6d, 0x65, 0x74, 0x61, 0x22, 0x3a, 0x7b, 0x22, 0x67, 0x22, 0x3a, 0x22, 0x4c, 0x6f, 0x74, 0x74, 0x69, 0x65, 0x46, 0x69, 0x6c, 0x65, 0x73, 0x20, 0x41, 0x45, 0x20, 0x31, 0x2e, 0x30, 0x2e, 0x30, 0x22, 0x2c, 0x22, 0x61, 0x22, 0x3a, 0x22, 0x22, 0x2c, 0x22, 0x6b, 0x22, 0x3a, 0x22, 0x22, 0x2c, 0x22, 0x64, 0x22, 0x3a, 0x22, 0x22, 0x2c, 0x22, 0x74, 0x63, 0x22, 0x3a, 0x22, 0x22, 0x7d, 0x2c, 0x22, 0x66, 0x72, 0x22, 0x3a, 0x36, 0x30, 0x2c, 0x22, 0x69, 0x70, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x6f, 0x70, 0x22, 0x3a, 0x36, 0x30, 0x2c, 0x22, 0x77, 0x22, 0x3a, 0x37, 0x32, 0x30, 0x2c, 0x22, 0x68, 0x22, 0x3a, 0x37, 0x32, 0x30, 0x2c, 0x22, 0x6e, 0x6d, 0x22, 0x3a, 0x22, 0x53, 0x75, 0x63, 0x63, 0x65, 0x73, 0x73, 0x22, 0x2c, 0x22, 0x64, 0x64, 0x64, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x61, 0x73, 0x73, 0x65, 0x74, 0x73, 0x22, 0x3a, 0x5b, 0x5d, 0x2c, 0x22, 0x6c, 0x61, 0x79, 0x65, 0x72, 0x73, 0x22, 0x3a, 0x5b, 0x7b, 0x22, 0x64, 0x64, 0x64, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x69, 0x6e, 0x64, 0x22, 0x3a, 0x31, 0x2c, 0x22, 0x74, 0x79, 0x22, 0x3a, 0x34, 0x2c, 0x22, 0x6e, 0x6d, 0x22, 0x3a, 0x22, 0x53, 0x68, 0x61, 0x70, 0x65, 0x20, 0x4c, 0x61, 0x79, 0x65, 0x72, 0x20, 0x34, 0x22, 0x2c, 0x22, 0x73, 0x72, 0x22, 0x3a, 0x31, 0x2c, 0x22, 0x6b, 0x73, 0x22, 0x3a, 0x7b, 0x22, 0x6f, 0x22, 0x3a, 0x7b, 0x22, 0x61, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x6b, 0x22, 0x3a, 0x31, 0x30, 0x30, 0x2c, 0x22, 0x69, 0x78, 0x22, 0x3a, 0x31, 0x31, 0x7d, 0x2c, 0x22, 0x72, 0x22, 0x3a, 0x7b, 0x22, 0x61, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x6b, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x69, 0x78, 0x22, 0x3a, 0x31, 0x30, 0x7d, 0x2c, 0x22, 0x70, 0x22, 0x3a, 0x7b, 0x22, 0x61, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x6b, 0x22, 0x3a, 0x5b, 0x33, 0x33, 0x36, 0x2c, 0x33, 0x39, 0x36, 0x2c, 0x30, 0x5d, 0x2c, 0x22, 0x69, 0x78, 0x22, 0x3a, 0x32, 0x7d, 0x2c, 0x22, 0x61, 0x22, 0x3a, 0x7b, 0x22, 0x61, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x6b, 0x22, 0x3a, 0x5b, 0x30, 0x2c, 0x30, 0x2c, 0x30, 0x5d, 0x2c, 0x22, 0x69, 0x78, 0x22, 0x3a, 0x31, 0x7d, 0x2c, 0x22, 0x73, 0x22, 0x3a, 0x7b, 0x22, 0x61, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x6b, 0x22, 0x3a, 0x5b, 0x31, 0x30, 0x30, 0x2c, 0x31, 0x30, 0x30, 0x2c, 0x31, 0x30, 0x30, 0x5d, 0x2c, 0x22, 0x69, 0x78, 0x22, 0x3a, 0x36, 0x7d, 0x7d, 0x2c, 0x22, 0x61, 0x6f, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x73, 0x68, 0x61, 0x70, 0x65, 0x73, 0x22, 0x3a, 0x5b, 0x7b, 0x22, 0x74, 0x79, 0x22, 0x3a, 0x22, 0x67, 0x72, 0x22, 0x2c, 0x22, 0x69, 0x74, 0x22, 0x3a, 0x5b, 0x7b, 0x22, 0x69, 0x6e, 0x64, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x74, 0x79, 0x22, 0x3a, 0x22, 0x73, 0x68, 0x22, 0x2c, 0x22, 0x69, 0x78, 0x22, 0x3a, 0x31, 0x2c, 0x22, 0x6b, 0x73, 0x22, 0x3a, 0x7b, 0x22, 0x61, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x6b, 0x22, 0x3a, 0x7b, 0x22, 0x69, 0x22, 0x3a, 0x5b, 0x5b, 0x30, 0x2c, 0x30, 0x5d, 0x2c, 0x5b, 0x30, 0x2c, 0x30, 0x5d, 0x2c, 0x5b, 0x30, 0x2c, 0x30, 0x5d, 0x5d, 0x2c, 0x22, 0x6f, 0x22, 0x3a, 0x5b, 0x5b, 0x30, 0x2c, 0x30, 0x5d, 0x2c, 0x5b, 0x30, 0x2c, 0x30, 0x5d, 0x2c, 0x5b, 0x30, 0x2c, 0x30, 0x5d, 0x5d, 0x2c, 0x22, 0x76, 0x22, 0x3a, 0x5b, 0x5b, 0x2d, 0x31, 0x32, 0x33, 0x2c, 0x2d, 0x36, 0x36, 0x5d, 0x2c, 0x5b, 0x36, 0x2c, 0x34, 0x35, 0x5d, 0x2c, 0x5b, 0x33, 0x32, 0x31, 0x2c, 0x2d, 0x32, 0x36, 0x34, 0x5d, 0x5d, 0x2c, 0x22, 0x63, 0x22, 0x3a, 0x66, 0x61, 0x6c, 0x73, 0x65, 0x7d, 0x2c, 0x22, 0x69, 0x78, 0x22, 0x3a, 0x32, 0x7d, 0x2c, 0x22, 0x6e, 0x6d, 0x22, 0x3a, 0x22, 0x50, 0x61, 0x74, 0x68, 0x20, 0x31, 0x22, 0x2c, 0x22, 0x6d, 0x6e, 0x22, 0x3a, 0x22, 0x41, 0x44, 0x42, 0x45, 0x20, 0x56, 0x65, 0x63, 0x74, 0x6f, 0x72, 0x20, 0x53, 0x68, 0x61, 0x70, 0x65, 0x20, 0x2d, 0x20, 0x47, 0x72, 0x6f, 0x75, 0x70, 0x22, 0x2c, 0x22, 0x68, 0x64, 0x22, 0x3a, 0x66, 0x61, 0x6c, 0x73, 0x65, 0x7d, 0x2c, 0x7b, 0x22, 0x74, 0x79, 0x22, 0x3a, 0x22, 0x73, 0x74, 0x22, 0x2c, 0x22, 0x63, 0x22, 0x3a, 0x7b, 0x22, 0x61, 0x22, 0x3a, 0x30, 0x2c, 0x22, 0x6b, 0x22, 0x3a, 0x5b, 0x30, 0x2e, 0x32, 0x39, 0x38, 0x30, 0x33, 0x39, 0x32, 0x31, 0x35, 0x36, 0x38, 0x36, 0x2c, 0x30, 0x2e, 0x36, 0x38, 0x36, 0x32, 0x37, 0x34, 0x35, 0x30, 0x39, 0x38, 0x30, 0x34, 0x2c, 0x30, 0x2e, 0x33, 0x31, 0x33, 0x37, 0x32, 0x35,
@@ -30,220 +20,79 @@ const uint8_t test_lottie_approve[] = {
 };
 
 const size_t test_lottie_approve_size = sizeof(test_lottie_approve);
+#define CANVAS_WIDTH_TO_STRIDE(w, px_size) ((((w) * (px_size) + (LV_DRAW_BUF_STRIDE_ALIGN - 1)) / LV_DRAW_BUF_STRIDE_ALIGN) * LV_DRAW_BUF_STRIDE_ALIGN)
 
-// void lv_100ask_nes_run_internal(void * obj)
-// {
-//     LV_ASSERT_OBJ(obj, MY_CLASS);
-
-//     nes_obj = (lv_obj_t *)obj;
-
-//     lv_100ask_nes_set_lock(nes_obj);
-//     // Wait for the user to select the file when starting for the first time
-//     lv_100ask_nes_set_unlock(nes_obj);
-
-//     lv_100ask_nes_set_state(nes_obj, LV_100ASK_NES_STATE_NORMAL);
-
-//     if (start_application(lv_100ask_nes_get_fn(nes_obj)))
-//     {
-//       /* MainLoop */
-//       InfoNES_Main();
-
-//       /* End */
-//       SaveSRAM();
-//     }
-//     else
-//     {
-//       /* Not a NES format file */
-//       LV_LOG_ERROR("%s isn't a NES format file!", lv_100ask_nes_get_fn(nes_obj));
-//     }
-// }
-
-// #define GBA_EMU_PREFIX "gba_emu: "
-
-// #define OPTARG_TO_VALUE(value, type, base)                                  \
-//     do {                                                                    \
-//         char* ptr;                                                          \
-//         (value) = (type)strtoul(optarg, &ptr, (base));                      \
-//         if (*ptr != '\0') {                                                 \
-//             printf(GBA_EMU_PREFIX "Parameter error: -%c %s\n", ch, optarg); \
-//             show_usage(argv[0], EXIT_FAILURE);                              \
-//         }                                                                   \
-//     } while (0)
-
-// typedef struct
-// {
-//     const char* file_path;
-//     lv_gba_view_mode_t mode;
-//     int volume;
-// } gba_emu_param_t;
-
-// static void show_usage(const char* progname, int exitcode)
-// {
-//     printf("\nUsage: %s"
-//            " -f <string> -m <decimal-value> -m <decimal-value> -h\n",
-//         progname);
-//     printf("\nWhere:\n");
-//     printf("  -f <string> rom file path.\n");
-//     printf("  -m <decimal-value> view mode: "
-//            "0: simple; 1: virtual keypad.\n");
-//     printf("  -v <decimal-value> set volume: 0 ~ 100.\n");
-//     printf("  -h help.\n");
-
-//     exit(exitcode);
-// }
-
-// static void parse_commandline(int argc, char* const* argv, gba_emu_param_t* param)
-// {
-//     int ch;
-
-//     // if (argc < 2) {
-//     //     show_usage(argv[0], EXIT_FAILURE);
-//     // }
-
-//     memset(param, 0, sizeof(gba_emu_param_t));
-//     param->mode = LV_VER_RES < 400 ? LV_GBA_VIEW_MODE_SIMPLE : LV_GBA_VIEW_MODE_VIRTUAL_KEYPAD;
-//     param->volume = 100;
-//     param->file_path = "silent.gba";
-
-//     while ((ch = getopt(argc, argv, "f:m:v:h")) != -1) {
-//         switch (ch) {
-//         case 'f':
-//             param->file_path = optarg;
-//             break;
-
-//         case 'm':
-//             OPTARG_TO_VALUE(param->mode, lv_gba_view_mode_t, 10);
-//             break;
-
-//         case 'v':
-//             OPTARG_TO_VALUE(param->volume, int, 10);
-//             break;
-
-//         case '?':
-//             printf(GBA_EMU_PREFIX ": Unknown option: %c\n", optopt);
-//         case 'h':
-//             show_usage(argv[0], EXIT_FAILURE);
-//             break;
-//         }
-//     }
-// }
-
-// static void log_print_cb(lv_log_level_t level, const char* str)
-// {
-//     LV_UNUSED(level);
-//     printf("[LVGL]%s", str);
-// }
-
-
-void boot_screen::start()
+static void parse_commandline(gba_emu_param_t* param)
 {
-    spdlog::debug("Presenting launch options");
-    lvgl_renderer_inst->set_global_refresh_hint(COLOR_FAST);
+    int ch;
 
-    {
-        // Hello
-        // setup_animation();
+    // if (argc < 2) {
+    //     show_usage(argv[0], EXIT_FAILURE);
+    // }
+    param->file_path = "rom/silent.gba";
+
+    memset(param, 0, sizeof(gba_emu_param_t));
+    param->mode = LV_VER_RES < 400 ? LV_GBA_VIEW_MODE_SIMPLE : LV_GBA_VIEW_MODE_VIRTUAL_KEYPAD;
+    param->volume = 100;
+
+    // while ((ch = getopt(argc, argv, "f:m:v:h")) != -1) {
+    //     switch (ch) {
+    //     case 'f':
+    //         param->file_path = optarg;
+    //         break;
+
+    //     case 'm':
+    //         OPTARG_TO_VALUE(param->mode, lv_gba_view_mode_t, 10);
+    //         break;
+
+    //     case 'v':
+    //         OPTARG_TO_VALUE(param->volume, int, 10);
+    //         break;
+
+    //     case '?':
+    //         printf(GBA_EMU_PREFIX ": Unknown option: %c\n", optopt);
+    //     case 'h':
+    //         show_usage(argv[0], EXIT_FAILURE);
+    //         break;
+    //     }
+    // }
+}
+
+void start_gba(void)
+{
+
+    if (0) {
+
+        uint32_t buf[CANVAS_WIDTH_TO_STRIDE(100, 4) * 100 + LV_DRAW_BUF_ALIGN];
+        lv_obj_t* lottie = lv_lottie_create(lv_screen_active());
+        lv_lottie_set_buffer(lottie, 100, 100, lv_draw_buf_align(buf, LV_COLOR_FORMAT_ARGB8888));
+        lv_lottie_set_src_data(lottie, test_lottie_approve, test_lottie_approve_size);
+        lv_obj_center(lottie);
     }
 
-    {
-        start_hack_app();
+    // if (lv_port_init() < 0) {
+    //     LV_LOG_USER("hal init failed");
+    //     return;
+    // }
+
+    gba_emu_param_t param;
+    parse_commandline(&param);
+
+    lv_obj_t* gba_emu = lv_gba_emu_create(lv_scr_act(), param.file_path, param.mode);
+
+    if (!gba_emu) {
+        LV_LOG_USER("create gba emu failed");
+        return;
     }
 
-    std::this_thread::sleep_for(std::chrono::milliseconds(4000));
+    gba_port_init(gba_emu);
 
-    lvgl_renderer_inst->set_global_refresh_hint(MONOCHROME);
-    setup_boot_selection();
-
-    // wait for the user to select an option
-    std::unique_lock<std::mutex> lk(cv_m);
-    cv.wait(lk, [this] { return state != IN_FLIGHT; });
-    lk.unlock();
-
-    lvgl_renderer_inst->refresh({ 0, 0 }, { SCREEN_WIDTH, SCREEN_HEIGHT }, FULL);
-}
-
-boot_screen::~boot_screen()
-{
-    for (auto obj : deletion_queue) {
-        lv_obj_delete(obj);
+    LV_LOG_USER("volume = %d", param.volume);
+    if (param.volume > 0) {
+        if (gba_audio_init(gba_emu) < 0) {
+            LV_LOG_WARN("audio init failed");
+        }
     }
+
+    lv_obj_center(gba_emu);
 }
-
-void boot_screen::setup_animation()
-{
-    welcome_json = get_resource_file("animations/hello.json");
-
-    auto lottie_obj = lv_lottie_create(lv_screen_active());
-    lv_lottie_set_src_data(lottie_obj, welcome_json.data(), welcome_json.size());
-    lv_anim_set_repeat_count(lv_lottie_get_anim(lottie_obj), 1);
-
-    int width = static_cast<int>(std::round(SCREEN_WIDTH / 1.5));
-    int height = width / 3;
-    lottie_buf.resize(width * height * 4);
-    lv_lottie_set_buffer(lottie_obj, width, height, lottie_buf.data());
-
-    lv_obj_align(lottie_obj, LV_ALIGN_CENTER, 0, 0);
-
-    deletion_queue.push_back(lottie_obj);
-}
-
-lv_obj_t* boot_screen::create_boot_option(const char* title)
-{
-    auto btn = lv_obj_create(lv_screen_active());
-    lv_obj_set_size(btn, LV_PCT(40), LV_SIZE_CONTENT);
-    lv_obj_set_style_border_color(btn, lv_color_black(), 0);
-    lv_obj_set_style_border_width(btn, 5, 0);
-    lv_obj_set_style_bg_color(btn, lv_color_white(), 0);
-    lv_obj_set_style_radius(btn, 0, 0);
-    lv_obj_set_flex_flow(btn, LV_FLEX_FLOW_ROW);
-    lv_obj_set_style_pad_all(btn, 40, 0);
-    lv_obj_set_flex_align(btn, LV_FLEX_ALIGN_SPACE_BETWEEN, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-
-    // Create the title label
-    auto title_label = lv_label_create(btn);
-    lv_label_set_text(title_label, title);
-    lv_obj_set_style_text_font(title_label, &ebgaramond_48, 0);
-    lv_obj_set_size(title_label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-
-    // offset the title label
-    lv_obj_set_style_margin_top(title_label, 10, 0);
-
-    // Create the subtitle label
-    auto subtitle_label = lv_label_create(btn);
-    lv_label_set_text(subtitle_label, LV_SYMBOL_RIGHT);
-    lv_obj_set_size(subtitle_label, LV_SIZE_CONTENT, LV_SIZE_CONTENT);
-
-    // Add the box to the deletion queue
-    deletion_queue.push_back(title_label);
-    deletion_queue.push_back(subtitle_label);
-    deletion_queue.push_back(btn);
-
-    return btn;
-}
-
-void boot_screen::setup_boot_selection()
-{
-    auto remarkable = create_boot_option("reMarkable OS");
-    lv_obj_align(remarkable, LV_ALIGN_BOTTOM_MID, 0, -425);
-
-    lv_obj_add_event_cb(remarkable, [](lv_event_t* event) {
-        spdlog::debug("Launching reMarkable OS");
-        if (auto instance = boot_screen::instance.lock()) {
-            instance->state = RM_STOCK_OS;
-            instance->cv.notify_one();
-        } }, LV_EVENT_CLICKED, nullptr);
-
-    auto bifrost = create_boot_option("Bifrost");
-    lv_obj_align(bifrost, LV_ALIGN_BOTTOM_MID, 0, -200);
-
-    instance = shared_from_this();
-
-    lv_obj_add_event_cb(bifrost, [](lv_event_t* event) {
-        spdlog::debug("Launching Bifrost");
-        if (auto instance = boot_screen::instance.lock()) {
-            instance->state = BIFROST;
-            instance->cv.notify_one();
-        } }, LV_EVENT_CLICKED, nullptr);
-}
-
-std::weak_ptr<boot_screen> boot_screen::instance;

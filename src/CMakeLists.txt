@@ -9,6 +9,61 @@ file(GLOB_RECURSE lv_lib_100ask_sources ${PROJECT_SOURCE_DIR}/external/lv_lib_10
 add_compile_options(-Wno-narrowing)
 add_compile_definitions(LV_LVGL_H_INCLUDE_SIMPLE)
 
+
+
+# add_definitions(
+#         -DDEBUG=0
+#         -DFRONTEND_SUPPORTS_RGB565=1
+#         -DTILED_RENDERING=1
+#         -DSTATIC_LINKING=0
+#         -DUSE_TWEAKS=1
+#         -DUSE_FRAME_SKIP=1
+#         -DHAVE_NEON=0
+#         -Dretro_sleep=lv_port_sleep
+
+#         -DNDEBUG
+#         -D__LIBRETRO__
+#         -DINLINE=inline
+#         -DHAVE_STDINT_H
+#         -DHAVE_INTTYPES_H
+
+#         -DGBA_FRAME_SKIP="0"
+# )
+
+# # Include
+# set(VBA_NEXT_SOURCE_DIR ${PROJECT_SOURCE_DIR}/external/lv_gba_emu/vba-next)
+# include_directories(
+#         ${PROJECT_SOURCE_DIR}
+#         ${VBA_NEXT_SOURCE_DIR}/src
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/include
+# )
+# ## vba-next
+# file(GLOB VBA_NEXT_SOURCE
+#         ${VBA_NEXT_SOURCE_DIR}/src/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/src/*.cpp
+#         ${VBA_NEXT_SOURCE_DIR}/libretro/libretro.cpp
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/rthreads/rsemaphore.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/rthreads/rthreads.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/compat/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/encodings/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/file/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/streams/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/string/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/time/*.c
+# )
+# # Sources
+# ## porting
+# file(GLOB PORT_SOURCES "lv_gba_emu/port/*.c")
+
+# if (LV_USE_RPI)
+# file(GLOB PORT_RPI_SOURCES "lv_gba_emu/port/rpi/*.c")
+# endif ()
+
+# ## gba emu
+# file(GLOB GBA_EMU_SOURCES "lv_gba_emu/gba_emu/*.c*")
+
+
+
 add_library(rmBifrost SHARED entrypoint.cpp
         bifrost.cpp
         bifrost_impl.cpp
@@ -24,6 +79,13 @@ add_library(rmBifrost SHARED entrypoint.cpp
         # gui/nes_instance.h
         gui/happ_instance.cpp
         gui/happ_instance.h
+        gui/gba_instance.cpp
+        gui/gba_instance.h
+
+        # ${PORT_SOURCES}
+        # ${PORT_RPI_SOURCES}
+        # ${GBA_EMU_SOURCES}
+        # ${VBA_NEXT_SOURCE}
 
         # fonts
         resources/fonts/ebgaramond_48.c

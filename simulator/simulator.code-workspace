@@ -1,0 +1,224 @@
+{
+	// https://code.visualstudio.com/docs/editor/workspaces
+	// https://code.visualstudio.com/docs/editor/multi-root-workspaces
+	// https://code.visualstudio.com/docs/editor/variables-reference
+
+	"folders": [
+		{
+			"path": "."
+		},
+	],
+	// extensions.json section
+	"extensions": {
+		"recommendations": [
+			"ms-vscode.cpptools",              // common C/C++ support
+			"ms-vscode.cpptools-themes",       // general C/C++ theme
+			"ms-vscode.cmake-tools"            // cmake support
+		],
+		"unwantedRecommendations": [
+		]
+	},
+	// settings.json section
+	"settings": {
+		"files.trimTrailingWhitespace": true,
+		"files.insertFinalNewline": true,
+		"files.trimFinalNewlines": true,
+		"cmake.configureOnOpen": true,
+		"files.associations": {
+			"*.rpy": "renpy",
+			"glob.h": "c",
+			"lvgl.h": "c",
+			"deque": "c",
+			"list": "c",
+			"string": "c",
+			"vector": "c",
+			"*.tcc": "c",
+			"cstdint": "cpp",
+			"__bit_reference": "cpp",
+			"__config": "cpp",
+			"__debug": "cpp",
+			"__errc": "cpp",
+			"__hash_table": "cpp",
+			"__locale": "cpp",
+			"__mutex_base": "cpp",
+			"__node_handle": "cpp",
+			"__split_buffer": "cpp",
+			"__threading_support": "cpp",
+			"__verbose_abort": "cpp",
+			"array": "cpp",
+			"atomic": "cpp",
+			"bitset": "cpp",
+			"cctype": "cpp",
+			"charconv": "cpp",
+			"clocale": "cpp",
+			"cmath": "cpp",
+			"complex": "cpp",
+			"condition_variable": "cpp",
+			"cstdarg": "cpp",
+			"cstddef": "cpp",
+			"cstdio": "cpp",
+			"cstdlib": "cpp",
+			"cstring": "cpp",
+			"ctime": "cpp",
+			"cwchar": "cpp",
+			"cwctype": "cpp",
+			"exception": "cpp",
+			"initializer_list": "cpp",
+			"iomanip": "cpp",
+			"ios": "cpp",
+			"iosfwd": "cpp",
+			"istream": "cpp",
+			"limits": "cpp",
+			"locale": "cpp",
+			"mutex": "cpp",
+			"new": "cpp",
+			"numbers": "cpp",
+			"optional": "cpp",
+			"ostream": "cpp",
+			"queue": "cpp",
+			"ratio": "cpp",
+			"span": "cpp",
+			"sstream": "cpp",
+			"stack": "cpp",
+			"stdexcept": "cpp",
+			"streambuf": "cpp",
+			"string_view": "cpp",
+			"system_error": "cpp",
+			"thread": "cpp",
+			"tuple": "cpp",
+			"typeinfo": "cpp",
+			"unordered_map": "cpp",
+			"variant": "cpp",
+			"algorithm": "cpp",
+			"bit": "cpp",
+			"chrono": "cpp",
+			"compare": "cpp",
+			"concepts": "cpp",
+			"functional": "cpp",
+			"iterator": "cpp",
+			"memory": "cpp",
+			"memory_resource": "cpp",
+			"numeric": "cpp",
+			"random": "cpp",
+			"type_traits": "cpp",
+			"utility": "cpp",
+			"format": "cpp",
+			"text_encoding": "cpp",
+			"cinttypes": "cpp",
+			"boot_screen.h": "c",
+			"codecvt": "c",
+			"forward_list": "c",
+			"map": "c",
+			"set": "c",
+			"unordered_set": "c",
+			"expected": "c",
+			"regex": "c",
+			"source_location": "c",
+			"fstream": "c",
+			"future": "c",
+			"iostream": "c",
+			"semaphore": "c",
+			"shared_mutex": "c",
+			"stop_token": "c",
+			"cfenv": "c",
+			"typeindex": "c",
+			"valarray": "c",
+			"constants.h": "c",
+			"lv_types.h": "c",
+			"cmrc.hpp": "c",
+			"__tree": "c",
+			"lv_demos.h": "c",
+			"lv_lib_100ask.h": "c",
+			"lv_lib_100ask_conf.h": "c",
+			"lv_100ask_page_manager.h": "c",
+			"lv_100ask_screenshot.h": "c",
+			"lv_100ask_nes.h": "c",
+			"lv_100ask_example_pinyin_ime.h": "c",
+			"lv_100ask_pinyin_ime.h": "c",
+			"lv_100ask_file_explorer.h": "c",
+			"lv_event.h": "c",
+			"infones_system.h": "c",
+			"infones.h": "c",
+			"lv_examples.h": "c",
+			"nes_instance.h": "c",
+			"happ_instance.h": "c"
+		},
+	},
+	// tasks.json section
+	"tasks": {
+		"version": "2.0.0",
+		"tasks": [
+			{
+				"label": "Build",
+				"command": "cmake",
+				"args": [
+					"--build", "${command:cmake.buildDirectory}"
+				],
+				"group": {
+					"kind": "build",
+					"isDefault": true
+				},
+				"problemMatcher": {
+					"owner": "cpp",
+					"fileLocation": ["relative", "${workspaceFolder}"],
+					"pattern": {
+						"regexp": "^(.*):(\\d+):(\\d+):\\s+(warning|error):\\s+(.*)$",
+						"file": 1,
+						"line": 2,
+						"column": 3,
+						"severity": 4,
+						"message": 5
+					}
+				}
+			},
+			{
+				"label": "Build and Run",
+				"type": "shell",
+				"command": "${workspaceFolder}/bin/main",
+				"group": {
+					"kind": "test",
+					"isDefault": true
+				},
+				"dependsOn": "Build"
+			}
+		],
+	},
+	// launch.json section
+	"launch": {
+		"version": "0.2.0",
+		"configurations": [
+			{
+				"name": "Debug LVGL demo with gdb",
+				"type": "cppdbg",
+				"request": "launch",
+		        "program": "${workspaceFolder}/bin/main",
+				"args": [],
+				"cwd": "${workspaceFolder}",
+				"preLaunchTask": "Build",
+				"stopAtEntry": false,
+				"linux": {
+					"MIMode": "gdb",
+					"miDebuggerPath": "/usr/bin/gdb"
+				  },
+				  "osx": {
+					"MIMode": "lldb"
+				  },
+				  "windows": {
+					"MIMode": "gdb",
+					"miDebuggerPath": "C:\\MinGw\\bin\\gdb.exe"
+				  }
+			},
+			{
+				"name": "Debug LVGL demo with LLVM",
+				"type": "cppdbg",
+				"request": "launch",
+		        "program": "${workspaceFolder}/bin/main",
+				"args": [],
+				"cwd": "${workspaceFolder}",
+				"preLaunchTask": "Build",
+				"stopAtEntry": false,
+				"MIMode": "lldb"
+			},
+		],
+	},
+}
