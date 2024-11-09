@@ -1,39 +1,8 @@
 cmake_minimum_required(VERSION 3.10)
 project(lvgl C CXX)
 
-# Set the correct FreeRTOS port for your system (e.g., Posix for WSL)
-set(FREERTOS_PORT GCC_POSIX CACHE STRING "Port for FreeRTOS on Posix environment")
 
-unset(USE_FREERTOS CACHE)
 
-option(USE_FREERTOS "Enable FreeRTOS" OFF) # Turn this on to enable FreeRTOS
-
-if(USE_FREERTOS)
-    message(STATUS "FreeRTOS is enabled")
-
-    # FreeRTOS integration when USE_FREERTOS is enabled
-    add_library(freertos_config INTERFACE)
-    target_include_directories(freertos_config SYSTEM INTERFACE ${PROJECT_SOURCE_DIR}/config)
-    target_compile_definitions(freertos_config INTERFACE projCOVERAGE_TEST=0)
-
-    # Add FreeRTOS as a subdirectory
-    add_subdirectory(FreeRTOS)
-
-    # FreeRTOS-specific include directories
-    include_directories(${PROJECT_SOURCE_DIR}/FreeRTOS/include)
-    include_directories(${PROJECT_SOURCE_DIR}/FreeRTOS/portable/ThirdParty/GCC/Posix)
-    include_directories(${PROJECT_SOURCE_DIR}/config)
-
-    # Add FreeRTOS sources
-    file(GLOB FREERTOS_SOURCES
-        "${PROJECT_SOURCE_DIR}/FreeRTOS/*.c"
-        "${PROJECT_SOURCE_DIR}/FreeRTOS/portable/MemMang/heap_4.c"
-        "${PROJECT_SOURCE_DIR}/FreeRTOS/portable/ThirdParty/GCC/Posix/*.c"
-    )
-else()
-    message(STATUS "FreeRTOS is disabled")
-    set(FREERTOS_SOURCES "")  # No FreeRTOS sources if FreeRTOS is disabled
-endif()
 
 # Main include files of the project
 include_directories(${PROJECT_SOURCE_DIR}/main/inc)
@@ -67,18 +36,80 @@ add_compile_definitions($<$<BOOL:${LV_USE_LIBPNG}>:LV_USE_LIBPNG=1>)
 add_compile_definitions($<$<BOOL:${LV_USE_LIBJPEG_TURBO}>:LV_USE_LIBJPEG_TURBO=1>)
 add_compile_definitions($<$<BOOL:${LV_USE_FFMPEG}>:LV_USE_FFMPEG=1>)
 
+set(OUTER_PORTING_DIR "/Users/bank23232525/Documents/Eink/rmBifrost_gameboyadvance")
+
 # Add LVGL subdirectory
-# add_subdirectory(../external/lvgl)
+# add_subdirectory(lvgl)
 add_subdirectory(
     /Users/bank23232525/Documents/Eink/rmBifrost_gameboyadvance/external/lvgl
     ${CMAKE_BINARY_DIR}/lvgl_build
 )
-
 target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR} ${SDL2_INCLUDE_DIRS})
+add_subdirectory(
+    /Users/bank23232525/Documents/Eink/rmBifrost_gameboyadvance/external/lv_lib_100ask
+    ${CMAKE_BINARY_DIR}/lv_lib_100ask_build
+)
 
-# add_subdirectory(lv_lib_100ask)
-# add_subdirectory(lv_lib_100ask)
-# target_include_directories(lv_lib_100ask PUBLIC ../external/${PROJECT_SOURCE_DIR} ${SDL2_INCLUDE_DIRS})
+# add_definitions(
+#         -DDEBUG=0
+#         -DFRONTEND_SUPPORTS_RGB565=1
+#         -DTILED_RENDERING=1
+#         -DSTATIC_LINKING=0
+#         -DUSE_TWEAKS=1
+#         -DUSE_FRAME_SKIP=1
+#         -DHAVE_NEON=0
+#         -Dretro_sleep=lv_port_sleep
+
+#         -DNDEBUG
+#         -D__LIBRETRO__
+#         -DINLINE=inline
+#         -DHAVE_STDINT_H
+#         -DHAVE_INTTYPES_H
+
+#         -DGBA_FRAME_SKIP="0"
+# )
+
+# # Include
+# set(VBA_NEXT_SOURCE_DIR ${PROJECT_SOURCE_DIR}/lv_gba_emu/vba-next)
+# include_directories(
+#         ${PROJECT_SOURCE_DIR}
+#         ${VBA_NEXT_SOURCE_DIR}/src
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/include
+# )
+# ## vba-next
+# file(GLOB VBA_NEXT_SOURCE
+#         ${VBA_NEXT_SOURCE_DIR}/src/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/src/*.cpp
+#         ${VBA_NEXT_SOURCE_DIR}/libretro/libretro.cpp
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/rthreads/rsemaphore.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/rthreads/rthreads.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/compat/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/encodings/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/file/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/streams/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/string/*.c
+#         ${VBA_NEXT_SOURCE_DIR}/libretro-common/time/*.c
+# )
+
+# add_subdirectory(${OUTER_PORTING_DIR}/external/lv_lib_100ask)
+# add_subdirectory(/Users/bank23232525/Documents/Eink/rmBifrost_gameboyadvance/external/lv_lib_100ask/${CMAKE_BINARY_DIR}/lv_lib_100ask_build)
+# add_subdirectory(/Users/bank23232525/Documents/Eink/rmBifrost_gameboyadvance/external/lv_lib_100ask)
+
+# # # add_subdirectory(lv_lib_100ask)
+# # target_include_directories(lv_lib_100ask PUBLIC ${PROJECT_SOURCE_DIR} ${SDL2_INCLUDE_DIRS})
+# # add_subdirectory(lv_lib_100ask)
+# # # add_subdirectory(lv_lib_100ask)
+# # target_include_directories(lv_lib_100ask PUBLIC ${PROJECT_SOURCE_DIR} ${SDL2_INCLUDE_DIRS})
+# # Sources
+# ## porting
+# file(GLOB PORT_SOURCES "lv_gba_emu/port/*.c")
+
+# if (LV_USE_RPI)
+# file(GLOB PORT_RPI_SOURCES "lv_gba_emu/port/rpi/*.c")
+# endif ()
+
+# ## gba emu
+# file(GLOB GBA_EMU_SOURCES "lv_gba_emu/gba_emu/*.c*")
 
 
 # vba-next config
@@ -150,37 +181,30 @@ target_include_directories(lvgl PUBLIC ${PROJECT_SOURCE_DIR} ${SDL2_INCLUDE_DIRS
 
 
 
-# Create the main executable, depending on the FreeRTOS option
-if(USE_FREERTOS)
-    add_executable(main
-        ${PROJECT_SOURCE_DIR}/main/src/main.c
-        ${PROJECT_SOURCE_DIR}/main/src/freertos_main.cpp
-        ${PROJECT_SOURCE_DIR}/main/src/mouse_cursor_icon.c
-        ${PROJECT_SOURCE_DIR}/main/src/FreeRTOS_Posix_Port.c
-        ${PROJECT_SOURCE_DIR}/main/src/nes_instance.c
-        ${FREERTOS_SOURCES}  # Add only if USE_FREERTOS is enabled
-        # ${SOURCES} ${INCLUDES}
-    )
-    # Link FreeRTOS libraries
-    target_link_libraries(main freertos_config FreeRTOS)
-else()
-    add_executable(main
-        ${PROJECT_SOURCE_DIR}/main/src/main.c
-        ${PROJECT_SOURCE_DIR}/main/src/mouse_cursor_icon.c
-        ${PROJECT_SOURCE_DIR}/main/src/nes_instance.c
-        # ${SOURCES} ${INCLUDES}
-    )
-endif()
+#
+add_executable(main
+    ${PROJECT_SOURCE_DIR}/main/src/main.c
+    ${PROJECT_SOURCE_DIR}/main/src/mouse_cursor_icon.c
+    # ${PROJECT_SOURCE_DIR}/main/src/happ_instance.c
+    ${OUTER_PORTING_DIR}/src/gui/happ_instance.c
+    ${OUTER_PORTING_DIR}/src/gui/nes_instance.c
+
+    # ${PROJECT_SOURCE_DIR}/main/src/nes_instance.c
+    # ${PROJECT_SOURCE_DIR}/main/src/gba_instance.c
+    # ${PORT_SOURCES}
+    # ${PORT_RPI_SOURCES}
+    # ${GBA_EMU_SOURCES}
+    # ${VBA_NEXT_SOURCE}
+    # ${SOURCES} ${INCLUDES}
+)
+
 
 # Define LVGL configuration as a simple include
 target_compile_definitions(main PRIVATE LV_CONF_INCLUDE_SIMPLE)
-# target_link_libraries(main lvgl lvgl::examples lvgl::demos lvgl::thorvg ${SDL2_LIBRARIES} m pthread lv_lib_100ask)
-target_link_libraries(main lvgl lvgl::examples lvgl::demos ${SDL2_LIBRARIES} m pthread)
+target_link_libraries(main lvgl lvgl::examples lvgl::demos lvgl::thorvg ${SDL2_LIBRARIES} m pthread lv_lib_100ask)
+# target_link_libraries(main lvgl lvgl::examples lvgl::demos ${SDL2_LIBRARIES} m pthread)
 
-# Only link freertos_config if the FreeRTOS directory exists
-if(USE_FREERTOS)
-    target_link_libraries(main freertos_config)
-endif()
+
 
 # Custom target to run the executable
 add_custom_target(run COMMAND ${EXECUTABLE_OUTPUT_PATH}/main DEPENDS main)
@@ -190,7 +214,7 @@ if(LV_USE_DRAW_SDL)
     set(CMAKE_MODULE_PATH ${CMAKE_MODULE_PATH} "${CMAKE_SOURCE_DIR}/cmake")
     find_package(SDL2_image REQUIRED)
     target_include_directories(lvgl PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})
-    # target_include_directories(lv_lib_100ask PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})
+    target_include_directories(lv_lib_100ask PUBLIC ${SDL2_IMAGE_INCLUDE_DIRS})
     target_link_libraries(main ${SDL2_IMAGE_LIBRARIES})
 endif()
 
@@ -198,7 +222,7 @@ endif()
 if(LV_USE_LIBPNG)
     find_package(PNG REQUIRED)
     target_include_directories(lvgl PUBLIC ${PNG_INCLUDE_DIRS})
-    # target_include_directories(lv_lib_100ask PUBLIC ${PNG_INCLUDE_DIRS})
+    target_include_directories(lv_lib_100ask PUBLIC ${PNG_INCLUDE_DIRS})
     target_link_libraries(main ${PNG_LIBRARIES})
 endif()
 
@@ -206,7 +230,7 @@ endif()
 if(LV_USE_LIBJPEG_TURBO)
     find_package(JPEG REQUIRED)
     target_include_directories(lvgl PUBLIC ${JPEG_INCLUDE_DIRS})
-    # target_include_directories(lv_lib_100ask PUBLIC ${JPEG_INCLUDE_DIRS})
+    target_include_directories(lv_lib_100ask PUBLIC ${JPEG_INCLUDE_DIRS})
     target_link_libraries(main ${JPEG_LIBRARIES})
 endif()
 
@@ -219,7 +243,7 @@ endif()
 if(LV_USE_FREETYPE)
     find_package(Freetype REQUIRED)
     target_include_directories(lvgl PUBLIC ${FREETYPE_INCLUDE_DIRS})
-    # target_include_directories(lv_lib_100ask PUBLIC ${FREETYPE_INCLUDE_DIRS})
+    target_include_directories(lv_lib_100ask PUBLIC ${FREETYPE_INCLUDE_DIRS})
     target_link_libraries(main ${FREETYPE_LIBRARIES})
 endif()
 

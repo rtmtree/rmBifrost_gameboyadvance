@@ -141,7 +141,14 @@
 			"infones.h": "c",
 			"lv_examples.h": "c",
 			"nes_instance.h": "c",
-			"happ_instance.h": "c"
+			"gba_internal.h": "c",
+			"infones_papu.h": "c",
+			"stdbool.h": "c",
+			"stdint.h": "c",
+			"pthread.h": "c",
+			"happ_instance.h": "c",
+			"lv_conf.h": "c",
+			"lv_mem.h": "c"
 		},
 	},
 	// tasks.json section
