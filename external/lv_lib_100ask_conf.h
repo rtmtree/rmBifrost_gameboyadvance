@@ -13,7 +13,9 @@
 #ifndef LV_LIB_100ASK_CONF_H
 #define LV_LIB_100ASK_CONF_H
 
-#include "lv_conf.h"
+// #include "../happ_simulator/lv_conf.h"
+#include "../src/gui/lv_conf.h"
+// #include "lv_conf.h"
 
 #include "lvgl/src/lvgl_private.h"
 
@@ -153,4 +155,3 @@
 #endif /*LV_LIB_100ASK_H*/
 
 #endif /*End of "Content enable"*/
-

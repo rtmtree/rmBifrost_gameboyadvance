@@ -1,7 +1,7 @@
-#include "../../lv_lib_100ask/lv_lib_100ask.h"
-#include "../../lv_lib_100ask/src/lv_100ask_nes/lv_100ask_nes.h"
-#include "../../lv_lib_100ask/src/lv_100ask_nes/InfoNES.h"
-#include "../../lv_lib_100ask/src/lv_100ask_nes/InfoNES_System.h"
+#include "../../external/lv_lib_100ask/lv_lib_100ask.h"
+#include "../../external/lv_lib_100ask/src/lv_100ask_nes/lv_100ask_nes.h"
+#include "../../external/lv_lib_100ask/src/lv_100ask_nes/InfoNES.h"
+#include "../../external/lv_lib_100ask/src/lv_100ask_nes/InfoNES_System.h"
 #include "../../lvgl/src/misc/lv_event.h"
 #include <string.h>
 

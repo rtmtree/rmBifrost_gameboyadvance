@@ -2,6 +2,9 @@
 #ifndef NES_INSTANCE_H
 #define NES_INSTANCE_H
 
+#include "../../external/lvgl/lvgl.h"
+#include <stdint.h>
+
 enum {
     LV_MENU_ITEM_BUILDER_VARIANT_1_INTERNAL,
     LV_MENU_ITEM_BUILDER_VARIANT_2_INTERNAL

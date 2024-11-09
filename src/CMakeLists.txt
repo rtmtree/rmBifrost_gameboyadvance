@@ -75,17 +75,25 @@ add_library(rmBifrost SHARED entrypoint.cpp
         ${lv_lib_100ask_sources}
         gui/boot_screen.cpp
         gui/boot_screen.h
-        # gui/nes_instance.cpp
-        # gui/nes_instance.h
-        gui/happ_instance.cpp
-        gui/happ_instance.h
-        gui/gba_instance.cpp
-        gui/gba_instance.h
+        
+        gui/nes_instance.c
+        gui/nes_instance.h
+
+        # gui/happ_instance.cpp
+        # gui/happ_instance.h
+        # gui/gba_instance.cpp
+        # gui/gba_instance.h
 
         # ${PORT_SOURCES}
         # ${PORT_RPI_SOURCES}
         # ${GBA_EMU_SOURCES}
         # ${VBA_NEXT_SOURCE}
+        # ../external/wam_game/custom.c
+        # ../external/wam_game/custom.h
+        # ../external/wam_game/event_init.c
+        # ../external/wam_game/event_init.h
+        # ../external/wam_game/gui_guider.c
+        # ../external/wam_game/gui_guider.h
 
         # fonts
         resources/fonts/ebgaramond_48.c
