@@ -62,7 +62,8 @@ add_compile_definitions(LV_LVGL_H_INCLUDE_SIMPLE)
 # ## gba emu
 # file(GLOB GBA_EMU_SOURCES "lv_gba_emu/gba_emu/*.c*")
 
-
+# 📌📌 c for simulator
+# 📌📌 cpp for hardware
 
 add_library(rmBifrost SHARED entrypoint.cpp
         bifrost.cpp
@@ -75,12 +76,13 @@ add_library(rmBifrost SHARED entrypoint.cpp
         ${lv_lib_100ask_sources}
         gui/boot_screen.cpp
         gui/boot_screen.h
+
+        gui/happ_instance.cpp
+        gui/happ_instance.h
         
-        gui/nes_instance.c
+        gui/nes_instance.cpp
         gui/nes_instance.h
 
-        # gui/happ_instance.cpp
-        # gui/happ_instance.h
         # gui/gba_instance.cpp
         # gui/gba_instance.h
 
