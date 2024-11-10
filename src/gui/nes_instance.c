@@ -278,57 +278,61 @@ static void init_my_nes_front_end(lv_obj_t *parent)
     lv_obj_add_event_cb(btnm_opt, ctrl_btnm_event_cb, LV_EVENT_ALL, parent);
 
     /*menu*/
-    lv_obj_t *menu_area = lv_tabview_create(lv_layer_top());
-    lv_tabview_set_tab_bar_size(menu_area, 0);
-    lv_obj_center(menu_area);
-    lv_obj_set_size(menu_area, LV_PCT(70), LV_PCT(70));
-    lv_obj_set_style_radius(menu_area, 8, LV_PART_MAIN);
+    if (1){
 
-    // Add some tabs (the tabs are page (lv_page) and can be scrolled
-    lv_obj_t *tab1 = lv_tabview_add_tab(menu_area, "Setting");
-    lv_obj_t *tab2 = lv_tabview_add_tab(menu_area, "File explorer");
-    lv_tabview_set_act(menu_area, 1, LV_ANIM_OFF);
-    lv_obj_add_event_cb(lv_tabview_get_content(menu_area), menu_scroll_event_cb, LV_EVENT_SCROLL_END, NULL);
+        lv_obj_t *menu_area = lv_tabview_create(lv_layer_top());
+        lv_tabview_set_tab_bar_size(menu_area, 0);
+        lv_obj_center(menu_area);
+        lv_obj_set_size(menu_area, LV_PCT(70), LV_PCT(70));
+        lv_obj_set_style_radius(menu_area, 8, LV_PART_MAIN);
 
-    // tab 1: setting
-    lv_obj_set_flex_flow(tab1, LV_FLEX_FLOW_COLUMN);
-    lv_obj_set_flex_align(tab1, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
-    create_slider(tab1, LV_SYMBOL_SETTINGS, "Volume", 0, 100, 0);
-    create_slider(tab1, LV_SYMBOL_SETTINGS, "Brightness", 0, 100, 80);
-    create_slider(tab1, LV_SYMBOL_SETTINGS, "Zoom", 0, 1024, 256);    // <256: scale down, >256 scale up, 128 half size, 512 double size
-    create_slider(tab1, LV_SYMBOL_SETTINGS, "Velocity", 0, 50000, 0); // max 100ms(usleep)
+        // Add some tabs (the tabs are page (lv_page) and can be scrolled
+        lv_obj_t *tab1 = lv_tabview_add_tab(menu_area, "Setting");
+        lv_obj_t *tab2 = lv_tabview_add_tab(menu_area, "File explorer");
+        lv_tabview_set_act(menu_area, 1, LV_ANIM_OFF);
+        lv_obj_add_event_cb(lv_tabview_get_content(menu_area), menu_scroll_event_cb, LV_EVENT_SCROLL_END, NULL);
 
-    // tab 2: files explorer
-    lv_obj_t *file_explorer = lv_file_explorer_create(tab2);
-    lv_obj_center(file_explorer);
-    // lv_obj_align(file_explorer, LV_ALIGN_TOP_RIGHT, 0 ,0);
-    lv_obj_set_size(file_explorer, LV_PCT(100), LV_PCT(100));
+        // tab 1: setting
+        lv_obj_set_flex_flow(tab1, LV_FLEX_FLOW_COLUMN);
+        lv_obj_set_flex_align(tab1, LV_FLEX_ALIGN_START, LV_FLEX_ALIGN_CENTER, LV_FLEX_ALIGN_CENTER);
+        create_slider(tab1, LV_SYMBOL_SETTINGS, "Volume", 0, 100, 0);
+        create_slider(tab1, LV_SYMBOL_SETTINGS, "Brightness", 0, 100, 80);
+        create_slider(tab1, LV_SYMBOL_SETTINGS, "Zoom", 0, 1024, 256);    // <256: scale down, >256 scale up, 128 half size, 512 double size
+        create_slider(tab1, LV_SYMBOL_SETTINGS, "Velocity", 0, 50000, 0); // max 100ms(usleep)
+
+        // tab 2: files explorer
+        lv_obj_t *file_explorer = lv_file_explorer_create(tab2);
+        lv_obj_center(file_explorer);
+        // lv_obj_align(file_explorer, LV_ALIGN_TOP_RIGHT, 0 ,0);
+        lv_obj_set_size(file_explorer, LV_PCT(100), LV_PCT(100));
 
 
-    lv_file_explorer_open_dir(file_explorer, "/home/root");
+        // lv_file_explorer_open_dir(file_explorer, "/home/root");
+        lv_file_explorer_open_dir(file_explorer, "/home/root");
 
-    lv_obj_add_event_cb(file_explorer, file_explorer_event_cb, LV_EVENT_VALUE_CHANGED, parent);
+        lv_obj_add_event_cb(file_explorer, file_explorer_event_cb, LV_EVENT_VALUE_CHANGED, parent);
 
-    /* Modal Dialogue Box */
-    lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
-    // lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_HIDDEN);
-    lv_obj_set_style_bg_opa(lv_layer_top(), LV_OPA_50, 0);
-    lv_obj_set_style_bg_color(lv_layer_top(), lv_palette_main(LV_PALETTE_GREY), 0);
-    lv_obj_add_event_cb(lv_layer_top(), layer_top_event_cb, LV_EVENT_CLICKED, parent);
+        /* Modal Dialogue Box */
+        lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_CLICKABLE);
+        // lv_obj_add_flag(lv_layer_top(), LV_OBJ_FLAG_HIDDEN);
+        lv_obj_set_style_bg_opa(lv_layer_top(), LV_OPA_50, 0);
+        lv_obj_set_style_bg_color(lv_layer_top(), lv_palette_main(LV_PALETTE_GREY), 0);
+        lv_obj_add_event_cb(lv_layer_top(), layer_top_event_cb, LV_EVENT_CLICKED, parent);
 
-    /* 页面切换提示(Page switching prompt) */
-    lv_obj_t *label;
-    label = lv_label_create(lv_layer_top());
-    lv_label_set_text(label, LV_SYMBOL_LEFT "  ");
-    lv_obj_align_to(label, menu_area, LV_ALIGN_OUT_LEFT_MID, 0, 0);
+        /* 页面切换提示(Page switching prompt) */
+        lv_obj_t *label;
+        label = lv_label_create(lv_layer_top());
+        lv_label_set_text(label, LV_SYMBOL_LEFT "  ");
+        lv_obj_align_to(label, menu_area, LV_ALIGN_OUT_LEFT_MID, 0, 0);
 
-    label = lv_label_create(lv_layer_top());
-    lv_label_set_text(label, "  " LV_SYMBOL_RIGHT);
-    lv_obj_align_to(label, menu_area, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
+        label = lv_label_create(lv_layer_top());
+        lv_label_set_text(label, "  " LV_SYMBOL_RIGHT);
+        lv_obj_align_to(label, menu_area, LV_ALIGN_OUT_RIGHT_MID, 0, 0);
 
-    lv_100ask_nes_set_state(parent, LV_100ASK_NES_STATE_MENU);
-    lv_100ask_nes_set_key(parent, LV_100ASK_NES_KEY_MENU, LV_100ASK_NES_KEY_STATE_RELEASED);
-    lv_100ask_nes_set_lock(parent);
+        lv_100ask_nes_set_state(parent, LV_100ASK_NES_STATE_MENU);
+        lv_100ask_nes_set_key(parent, LV_100ASK_NES_KEY_MENU, LV_100ASK_NES_KEY_STATE_RELEASED);
+        lv_100ask_nes_set_lock(parent);
+    }
 }
 
 void start_nes(void)
