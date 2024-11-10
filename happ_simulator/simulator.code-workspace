@@ -148,7 +148,8 @@
 			"pthread.h": "c",
 			"happ_instance.h": "c",
 			"lv_conf.h": "c",
-			"lv_mem.h": "c"
+			"lv_mem.h": "c",
+			"lv_evdev.h": "c"
 		},
 	},
 	// tasks.json section
