@@ -101,7 +101,7 @@ add_library(rmBifrost SHARED entrypoint.cpp
         resources/fonts/ebgaramond_48.c
 )
 
-target_precompile_headers(rmBifrost PRIVATE "gui/lv_conf.h")
+target_precompile_headers(rmBifrost PRIVATE "../lv_conf.h")
 
 set_target_properties(rmBifrost PROPERTIES OUTPUT_NAME "bifrost")
 

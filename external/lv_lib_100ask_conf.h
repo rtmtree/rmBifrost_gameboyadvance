@@ -14,7 +14,7 @@
 #define LV_LIB_100ASK_CONF_H
 
 // #include "../happ_simulator/lv_conf.h"
-#include "../src/gui/lv_conf.h"
+#include "../lv_conf.h"
 // #include "lv_conf.h"
 
 #include "lvgl/src/lvgl_private.h"

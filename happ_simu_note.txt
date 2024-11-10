@@ -1,0 +1,8 @@
+
+1. cpp to c
+
+
+2.
+in external/lvgl/src/lv_conf_internal.h
+#include "../../../happ_simulator/lv_conf.h"     
+instead of  #include "../../../src/gui/lv_conf.h"      
